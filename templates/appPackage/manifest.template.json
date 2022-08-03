@@ -48,6 +48,14 @@
                         {
                             "title": "learn",
                             "description": "Learn about Adaptive Card and Bot Command"
+                        },
+                        {
+                            "title": "cats",
+                            "description": "Sends 3 cats in a carousel format."
+                        },
+                        {
+                            "title": "ud",
+                            "description": "Looks up term written after ud."
                         }
                     ]
                 }
@@ -123,8 +131,8 @@
                     ]
                 },
                 {
-                    "id": "lookup",
-                    
+                    "id": "urbanDefine",
+                    "initialRun": true,
                     "context": [
                         "compose",
                         "commandBox", 

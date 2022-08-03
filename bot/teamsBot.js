@@ -1,6 +1,6 @@
 const axios = require("axios");
 const querystring = require("querystring");
-const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory } = require("botbuilder");
+const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo } = require("botbuilder");
 const fs = require('fs');
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
 const rawLearnCard = require("./adaptiveCards/learn.json");
@@ -37,14 +37,16 @@ class TeamsBot extends TeamsActivityHandler {
     this.onMessage(async (context, next) => {
       console.log("Running with Message Activity.");
       let txt = context.activity.text;
+      let splitText = []
       const removedMentionText = TurnContext.removeRecipientMention(context.activity);
       if (removedMentionText) {
         // Remove the line break
         txt = removedMentionText.toLowerCase().replace(/\n|\r/g, "").trim();
+        splitText = txt.split(' ')
       }
 
       // Trigger command by IM text
-      switch (txt) {
+      switch (splitText[0]) {
         case "welcome": {
           const card = cardTools.AdaptiveCards.declareWithoutData(rawWelcomeCard).render();
           await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
@@ -60,6 +62,11 @@ class TeamsBot extends TeamsActivityHandler {
           await context.sendActivity(MessageFactory.carousel([rawCat1Card, rawCat2Card, rawCat3Card])) //content type not defined
           break;
         }
+        case "ud": { //this doesnt fire, it gets recognised but doesnt execute its code
+          const card = await lookup(txt.substring(3)); //passes txt without "ud " - doesnt use aplitText[1] in case of multi word search e.g. "big dog"
+          await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
+          break;
+        }
         /**
          * case "yourCommand": {
          *   await context.sendActivity(`Add your response here!`);
@@ -73,15 +80,15 @@ class TeamsBot extends TeamsActivityHandler {
             {
               if ((i/2) % 1 === 0) //even
               {
-                reply += txt[i].toUpperCase()
+                reply += txt[i].toUpperCase();
               }
               else
               {
-                reply += txt[i].toLowerCase()
+                reply += txt[i].toLowerCase();
               }
             }
           await context.sendActivity(reply);
-          await context.sendActivity(context.activity.from.name);
+          //await context.sendActivity(context.activity.from.name);
           }
       }
 
@@ -113,7 +120,8 @@ class TeamsBot extends TeamsActivityHandler {
       //  await context.sendActivity("Seeya " + name)
       await context.sendActivity("Someone has been removed from the team.")
       }
-    })
+      await next();
+    });
   }
 
   // Invoked when an action is taken on an Adaptive Card. The Adaptive Card sends an event to the Bot and this
@@ -142,15 +150,11 @@ class TeamsBot extends TeamsActivityHandler {
         return createCardCommand(context, action);
       case "shareMessage":
         return shareMessageCommand(context, action);
-      case "lookup":
+      case "urbanDefine":
         return lookupCommand(context, action);
       default:
         throw new Error("NotImplemented");
     }
-  }
-
-  handleTeamsMessagingExtensionFetchTask(context, action) {
-    console.log("heyo") //??
   }
 
   // Search.
@@ -285,42 +289,13 @@ function shareMessageCommand(context, action) {
 
 async function lookupCommand(context, action) {
   
-  let results = await lookup(action.data.searchWord.trim())
-  if (results != [] & results != undefined){
-    let urbanDefinition = {
-      word: results.word,
-      definition: results.definition,
-      example: results.example,
-      author: results.author,
-      date: results.written_on.substring(0,10), //need to use Date() function to make it readable format
-      likes: results.thumbs_up,
-      dislikes: results.thumbs_down,
-      viewUrl: results.permalink
+  let resultCard = await lookup(action.data.searchWord.trim())
+  return {
+    composeExtension: {
+      type: "result",
+      attachmentLayout: "list",
+      attachments: [resultCard]
     }
-    urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\\[|\\]', 'g'), ''); //all hyperlinked words are nested into square brackets, removes them
-    urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\r', 'g'), '\n'); //cards dont do anything with /r/n, only /n/n
-    urbanDefinition.example = urbanDefinition.example.replace(RegExp('\\[|\\]', 'g'), '');
-    urbanDefinition.example = urbanDefinition.example.replace(RegExp('\r', 'g'), '\n');
-    const card = cardTools.AdaptiveCards.declare(rawDictCard).render(urbanDefinition);
-    return {
-      composeExtension: {
-        type: "result",
-        attachmentLayout: "list",
-        attachments: [card]
-      }
-    }
-  }
-  else{
-    const heroCard = CardFactory.heroCard(
-      `There is no Urban Dictionary definition for ${action.data.searchWord}`
-    );
-    return{
-      composeExtension: {
-        type: "result",
-        attachmentLayout: "list",
-        attachments: [heroCard]
-      }
-    };
   }
 }
 
@@ -335,16 +310,39 @@ async function lookup(word){
       'X-RapidAPI-Host': 'mashape-community-urban-dictionary.p.rapidapi.com'
   }
   };
-  let result = []
+  let card;
   await axios.request(options).then(response => {
-      console.log(response.data.list[0]);
+      //console.log(response.data.list[0]);
       result = response.data.list[0];
-      return;
+      if (result != [] & result != undefined){
+        let urbanDefinition = {
+          word: result.word,
+          definition: result.definition,
+          example: result.example,
+          author: result.author,
+          date: result.written_on.substring(0,10), //need to use Date() function to make it readable format
+          likes: result.thumbs_up,
+          dislikes: result.thumbs_down,
+          viewUrl: result.permalink
+        }
+        urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\\[|\\]', 'g'), ''); //all hyperlinked words are nested into square brackets, removes them
+        urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\r', 'g'), '\n'); //cards dont do anything with /r/n, only /n/n
+        urbanDefinition.example = urbanDefinition.example.replace(RegExp('\\[|\\]', 'g'), '');
+        urbanDefinition.example = urbanDefinition.example.replace(RegExp('\r', 'g'), '\n');
+        card = cardTools.AdaptiveCards.declare(rawDictCard).render(urbanDefinition);
+        return card;
+      }
+      else{
+        card = CardFactory.heroCard(
+          `There is no Urban Dictionary definition for ${action.data.searchWord}`
+        );
+        return card;
+      }
   }).catch(error => {
       console.error(error);
       return;
   });
-  return result;
+  return card;
 }
 
 module.exports.TeamsBot = TeamsBot;
