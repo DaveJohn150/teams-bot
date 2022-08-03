@@ -107,12 +107,14 @@ class TeamsBot extends TeamsActivityHandler {
     // Listen to MembersAdded event, view https://docs.microsoft.com/en-us/microsoftteams/platform/resources/bot-v3/bots-notifications for more events
     this.onMembersAdded(async (context, next) => {
       const membersAdded = context.activity.membersAdded;
+      let memberNameObj = {memberName: ''}
       for (let cnt = 0; cnt < membersAdded.length; cnt++) {
         if (membersAdded[cnt].id) {
           let member = await TeamsInfo.getMember(context, membersAdded[cnt].id);
-          this.memberNameObj.memberName = member.givenName;
+          if (member.givenName)
+          {memberNameObj.memberName = member.givenName;}
           //render passes in an object of all dynamic variables within the card, they must be the same name as the ${varName} in the card
-          const card = cardTools.AdaptiveCards.declare(rawWelcomeCard).render(this.memberNameObj);  
+          const card = cardTools.AdaptiveCards.declare(rawWelcomeCard).render(memberNameObj);  
           await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
           break;
         }
