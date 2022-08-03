@@ -2,6 +2,9 @@ const axios = require("axios");
 const querystring = require("querystring");
 const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo } = require("botbuilder");
 const fs = require('fs');
+const { exit } = require("process");
+
+//import card templates
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
 const rawLearnCard = require("./adaptiveCards/learn.json");
 const rawCat1Card = require("./adaptiveCards/cat1.json");
@@ -9,7 +12,7 @@ const rawCat2Card = require("./adaptiveCards/cat2.json");
 const rawCat3Card = require("./adaptiveCards/cat3.json");
 const rawDictCard = require("./adaptiveCards/urbanDict.json");
 const cardTools = require("@microsoft/adaptivecards-tools");
-const { exit } = require("process");
+
 let urbanDictionaryAPIKey = '';
 fs.readFile('./urbanAPIKey.txt', 'utf8', (err, data) => {
   if (err){
@@ -63,8 +66,13 @@ class TeamsBot extends TeamsActivityHandler {
           break;
         }
         case "ud": { //this doesnt fire, it gets recognised but doesnt execute its code
-          const card = await lookup(txt.substring(3)); //passes txt without "ud " - doesnt use aplitText[1] in case of multi word search e.g. "big dog"
-          await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
+          if (splitText.length() == 1) {
+            context.sendActivity('ud command must include word to search. E.g. "ud updog"')
+          }
+          else {
+            const card = await lookup(txt.substring(3)); //passes txt without "ud " - doesnt use aplitText[1] in case of multi word search e.g. "big dog"
+            await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
+          }
           break;
         }
         /**
