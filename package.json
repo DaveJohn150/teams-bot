@@ -9,5 +9,8 @@
     "devDependencies": {
         "@microsoft/teamsfx-cli": "1.*"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "dotenv": "^16.0.1"
+    }
 }

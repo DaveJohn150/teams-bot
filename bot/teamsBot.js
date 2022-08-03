@@ -3,6 +3,7 @@ const querystring = require("querystring");
 const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo } = require("botbuilder");
 const fs = require('fs');
 const { exit } = require("process");
+require('dotenv').config();
 
 //import card templates
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
@@ -13,20 +14,12 @@ const rawCat3Card = require("./adaptiveCards/cat3.json");
 const rawDictCard = require("./adaptiveCards/urbanDict.json");
 const cardTools = require("@microsoft/adaptivecards-tools");
 
-let urbanDictionaryAPIKey = '';
-fs.readFile('./urbanAPIKey.txt', 'utf8', (err, data) => {
-  if (err){
-    console.error(err);
-    return;
-  }
-  else if (data == undefined | data.trim() == ''){
-    console.error('No API key in txt file');
-    exit();
-  }
-  else{
-    urbanDictionaryAPIKey = data.trim();
-  }
-});
+//local env for api keys - not for deploy to azure
+let urbanDictionaryAPIKey = process.env.URBAN_API; 
+if (typeof urbanDictionaryAPIKey !== "undefined" | urbanDictionaryAPIKey.trim() == ''){
+  console.error('No API key in txt file');
+  exit();
+}
 
 
 class TeamsBot extends TeamsActivityHandler {
@@ -66,7 +59,7 @@ class TeamsBot extends TeamsActivityHandler {
           break;
         }
         case "ud": { //this doesnt fire, it gets recognised but doesnt execute its code
-          if (splitText.length() == 1) {
+          if (splitText.length == 1) {
             context.sendActivity('ud command must include word to search. E.g. "ud updog"')
           }
           else {
@@ -298,8 +291,12 @@ function shareMessageCommand(context, action) {
 }
 
 async function lookupCommand(context, action) {
-  
-  let resultCard = await lookup(action.data.searchWord.trim())
+  let resultCard;
+  if (typeof action.data.searchWord !== "undefined"){
+    resultCard = CardFactory.heroCard(`There is no Urban Dictionary definition for ${action.data.searchWord}`)
+  }
+  else
+  {resultCard = await lookup(action.data.searchWord.trim())}
   return {
     composeExtension: {
       type: "result",
@@ -324,7 +321,7 @@ async function lookup(word){
   await axios.request(options).then(response => {
       //console.log(response.data.list[0]);
       result = response.data.list[0];
-      if (result != [] & result != undefined){
+      if (result != [] & typeof result !== "undefined"){
         let urbanDefinition = {
           word: result.word,
           definition: result.definition,
