@@ -1,10 +1,10 @@
 const axios = require("axios");
 const querystring = require("querystring");
 const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo } = require("botbuilder");
+const cardTools = require("@microsoft/adaptivecards-tools");
 const fs = require('fs');
 const { exit } = require("process");
 require('dotenv').config();
-
 //import card templates
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
 const rawLearnCard = require("./adaptiveCards/learn.json");
@@ -12,7 +12,7 @@ const rawCat1Card = require("./adaptiveCards/cat1.json");
 const rawCat2Card = require("./adaptiveCards/cat2.json");
 const rawCat3Card = require("./adaptiveCards/cat3.json");
 const rawDictCard = require("./adaptiveCards/urbanDict.json");
-const cardTools = require("@microsoft/adaptivecards-tools");
+const rawPeopleCard = require("./adaptiveCards/peoplePicker.json");
 
 class TeamsBot extends TeamsActivityHandler {
   constructor() {
@@ -34,6 +34,7 @@ class TeamsBot extends TeamsActivityHandler {
       }
 
       // Trigger command by IM text
+      if(splitText[0]){
       switch (splitText[0]) {
         case "welcome": {
           const card = cardTools.AdaptiveCards.declareWithoutData(rawWelcomeCard).render();
@@ -47,7 +48,8 @@ class TeamsBot extends TeamsActivityHandler {
           break;
         }
         case "cats": {
-          await context.sendActivity(MessageFactory.carousel([rawCat1Card, rawCat2Card, rawCat3Card])) //content type not defined
+          await context.sendActivity(MessageFactory.carousel([rawCat1Card, rawCat2Card, rawCat3Card])) 
+          //first card will be larger than the rest, maybe because its a title card
           break;
         }
         case "ud": { //this doesnt fire, it gets recognised but doesnt execute its code
@@ -58,6 +60,11 @@ class TeamsBot extends TeamsActivityHandler {
             const card = await lookup(txt.substring(3)); //passes txt without "ud " - doesnt use aplitText[1] in case of multi word search e.g. "big dog"
             await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
           }
+          break;
+        }
+        case "p":{
+          const card = cardTools.AdaptiveCards.declare(rawPeopleCard).render();
+          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
           break;
         }
         /**
@@ -83,6 +90,7 @@ class TeamsBot extends TeamsActivityHandler {
           await context.sendActivity(reply);
           //await context.sendActivity(context.activity.from.name);
           }
+        }
       }
 
       // By calling next() you ensure that the next BotHandler is run.
