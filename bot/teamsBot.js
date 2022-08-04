@@ -14,14 +14,6 @@ const rawCat3Card = require("./adaptiveCards/cat3.json");
 const rawDictCard = require("./adaptiveCards/urbanDict.json");
 const cardTools = require("@microsoft/adaptivecards-tools");
 
-//local env for api keys - not for deploy to azure
-let urbanDictionaryAPIKey = process.env.URBAN_API; 
-if (typeof urbanDictionaryAPIKey !== "undefined" | urbanDictionaryAPIKey.trim() == ''){
-  console.error('No API key in txt file');
-  exit();
-}
-
-
 class TeamsBot extends TeamsActivityHandler {
   constructor() {
     super();
@@ -307,6 +299,15 @@ async function lookupCommand(context, action) {
 }
 
 async function lookup(word){
+
+  //local env for api keys - not for deploy to azure
+let urbanDictionaryAPIKey = process.env.URBAN_API; 
+
+if (typeof urbanDictionaryAPIKey !== "undefined" | urbanDictionaryAPIKey.trim() == ''){
+  console.error('No API key detected');
+  exit();
+}
+
   String(word); 
   const options = {
   method: 'GET',
@@ -319,7 +320,7 @@ async function lookup(word){
   };
   let card;
   await axios.request(options).then(response => {
-      //console.log(response.data.list[0]);
+          //console.log(response.data.list[0]);
       result = response.data.list[0];
       if (result != [] & typeof result !== "undefined"){
         let urbanDefinition = {
