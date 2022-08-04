@@ -19,10 +19,7 @@ class TeamsBot extends TeamsActivityHandler {
   constructor() {
     super();
 
-    // record the likeCount
-    this.likeCountObj = { likeCount: 0 };
-
-
+    /*
     this.onMessage(async (context, next) => {
       console.log("Running with Message Activity.");
       let txt = context.activity.text;
@@ -37,23 +34,7 @@ class TeamsBot extends TeamsActivityHandler {
       // Trigger command by IM text
       if(splitText[0]){
       switch (splitText[0]) {
-        case "welcome": {
-          const card = cardTools.AdaptiveCards.declareWithoutData(rawWelcomeCard).render();
-          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
-          break;
-        }
-        case "learn": {
-          this.likeCountObj.likeCount = 0;
-          const card = cardTools.AdaptiveCards.declare(rawLearnCard).render(this.likeCountObj);
-          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
-          break;
-        }
-        case "cats": {
-          await context.sendActivity(MessageFactory.carousel([rawCat1Card, rawCat2Card, rawCat3Card])) 
-          //first card will be larger than the rest, maybe because its a title card
-          break;
-        }
-        case "ud": { //this doesnt fire, it gets recognised but doesnt execute its code
+        case "ud": { 
           if (splitText.length == 1) {
             context.sendActivity('ud command must include word to search. E.g. "ud updog"')
           }
@@ -63,46 +44,17 @@ class TeamsBot extends TeamsActivityHandler {
           }
           break;
         }
-        case "picker":{
-          const card = cardTools.AdaptiveCards.declare(rawPeopleCard).render();
-          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
-          break;
-        }
-
-        /**
-         * case "yourCommand": {
-         *   await context.sendActivity(`Add your response here!`);
-         *   break;
-         * }
-         */
-         default:
-          {
-            let reply = ''
-            for (let i = 0; i < txt.length; i++)
-            {
-              if ((i/2) % 1 === 0) //even
-              {
-                reply += txt[i].toUpperCase();
-              }
-              else
-              {
-                reply += txt[i].toLowerCase();
-              }
-            }
-          await context.sendActivity(reply);
-          //await context.sendActivity(context.activity.from.name);
-          }
-        }
       }
 
       // By calling next() you ensure that the next BotHandler is run.
       await next();
     });
+    */
 
     // Listen to MembersAdded event, view https://docs.microsoft.com/en-us/microsoftteams/platform/resources/bot-v3/bots-notifications for more events
     this.onMembersAdded(async (context, next) => {
       const membersAdded = context.activity.membersAdded;
-      let memberNameObj = {memberName: ''}
+      let memberNameObj = {memberName: ' '}
       for (let cnt = 0; cnt < membersAdded.length; cnt++) {
         if (membersAdded[cnt].id) {
           let member = await TeamsInfo.getMember(context, membersAdded[cnt].id);
@@ -113,17 +65,6 @@ class TeamsBot extends TeamsActivityHandler {
           await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
           break;
         }
-      }
-      await next();
-    });
-      //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
-    this.onMembersRemoved(async (context, next) => {
-      const membersRemoved = context.activity.membersRemoved;
-      for (let i = 0; i < membersRemoved.length; i++)
-      { 
-      //  let name = await TeamsInfo.getMember(context, membersRemoved[i].id); //this does not work
-      //  await context.sendActivity("Seeya " + name)
-      await context.sendActivity("Someone has been removed from the team.")
       }
       await next();
     });
@@ -170,65 +111,7 @@ class TeamsBot extends TeamsActivityHandler {
         throw new Error("NotImplemented");
     }
   }
-
-  // Search.
-  async handleTeamsMessagingExtensionQuery(context, query) {
-    const searchQuery = query.parameters[0].value;
-    const response = await axios.get(
-      `http://registry.npmjs.com/-/v1/search?${querystring.stringify({
-        text: searchQuery,
-        size: 8,
-      })}`
-    );
-
-    const attachments = [];
-    response.data.objects.forEach((obj) => {
-      const heroCard = CardFactory.heroCard(obj.package.name);
-      const preview = CardFactory.heroCard(obj.package.name);
-      preview.content.tap = {
-        type: "invoke",
-        value: { name: obj.package.name, description: obj.package.description },
-      };
-      const attachment = { ...heroCard, preview };
-      attachments.push(attachment);
-    });
-
-    return {
-      composeExtension: {
-        type: "result",
-        attachmentLayout: "list",
-        attachments: attachments,
-      },
-    };
-  }
-
-  async handleTeamsMessagingExtensionSelectItem(context, obj) {
-    return {
-      composeExtension: {
-        type: "result",
-        attachmentLayout: "list",
-        attachments: [CardFactory.heroCard(obj.name, obj.description)],
-      },
-    };
-  }
-
-  // Link Unfurling.
-  handleTeamsAppBasedLinkQuery(context, query) {
-    const attachment = CardFactory.thumbnailCard("Thumbnail Card", query.url, [query.url]);
-
-    const result = {
-      attachmentLayout: "list",
-      type: "result",
-      attachments: [attachment],
-    };
-
-    const response = {
-      composeExtension: result,
-    };
-    return response;
-  }
 }
-
 function createCardCommand(context, action) {
   // The user has chosen to create a card by choosing the 'Create Card' context menu command.
   const data = action.data;
@@ -304,10 +187,10 @@ function shareMessageCommand(context, action) {
 async function lookupCommand(context, action) {
   let resultCard;
   if (typeof action.data.searchWord !== "undefined"){
-    resultCard = CardFactory.heroCard(`There is no Urban Dictionary definition for ${action.data.searchWord}`)
+    resultCard = await lookup(action.data.searchWord.trim());
   }
   else
-  {resultCard = await lookup(action.data.searchWord.trim())}
+  { return;}
   return {
     composeExtension: {
       type: "result",
@@ -324,7 +207,7 @@ let urbanDictionaryAPIKey = process.env.URBAN_API;
 
 if (typeof urbanDictionaryAPIKey !== "undefined" | urbanDictionaryAPIKey.trim() == ''){
   console.error('No API key detected');
-  exit();
+  await exit();
 }
 
   String(word); 

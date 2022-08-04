@@ -113,24 +113,6 @@
                     ]
                 },
                 {
-                    "id": "searchQuery",
-                    "context": [
-                        "compose",
-                        "commandBox"
-                    ],
-                    "description": "Test command to run query",
-                    "title": "Search",
-                    "type": "query",
-                    "parameters": [
-                        {
-                            "name": "searchQuery",
-                            "title": "Search Query",
-                            "description": "Your search query",
-                            "inputType": "text"
-                        }
-                    ]
-                },
-                {
                     "id": "urbanDefine",
                     "initialRun": true,
                     "context": [
@@ -149,16 +131,6 @@
                         "inputType": "text"
                       }
                     ]
-                }
-            ],
-            "messageHandlers": [
-                {
-                    "type": "link",
-                    "value": {
-                        "domains": [
-                            "*.botframework.com"
-                        ]
-                    }
                 }
             ]
         }
