@@ -5,6 +5,7 @@ const cardTools = require("@microsoft/adaptivecards-tools");
 const fs = require('fs');
 const { exit } = require("process");
 require('dotenv').config();
+
 //import card templates
 const rawWelcomeCard = require("./adaptiveCards/welcome.json");
 const rawLearnCard = require("./adaptiveCards/learn.json");
@@ -62,11 +63,12 @@ class TeamsBot extends TeamsActivityHandler {
           }
           break;
         }
-        case "p":{
+        case "picker":{
           const card = cardTools.AdaptiveCards.declare(rawPeopleCard).render();
           await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
           break;
         }
+
         /**
          * case "yourCommand": {
          *   await context.sendActivity(`Add your response here!`);
@@ -140,6 +142,15 @@ class TeamsBot extends TeamsActivityHandler {
         attachments: [CardFactory.adaptiveCard(card)],
       });
       return { statusCode: 200 };
+    }
+    else if (invokeValue.action.verb == "assignTask") {
+      const title = invokeValue.action.data.taskTitle;
+      const desc = invokeValue.action.data.taskDescription;
+      const date = invokeValue.action.data.taskDate;
+      const time = invokeValue.action.data.taskTime;
+      const users = invokeValue.action.data.userID;
+      const meeting = {attendees: users, content: title, startTime: time};
+      
     }
   }
 
