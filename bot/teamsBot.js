@@ -1,27 +1,17 @@
 const axios = require("axios");
-const querystring = require("querystring");
 const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo } = require("botbuilder");
 const cardTools = require("@microsoft/adaptivecards-tools");
-const fs = require('fs');
 const { exit } = require("process");
 require('dotenv').config();
 
 //import card templates
-const rawWelcomeCard = require("./adaptiveCards/welcome.json");
-const rawLearnCard = require("./adaptiveCards/learn.json");
-const rawCat1Card = require("./adaptiveCards/cat1.json");
-const rawCat2Card = require("./adaptiveCards/cat2.json");
-const rawCat3Card = require("./adaptiveCards/cat3.json");
 const rawDictCard = require("./adaptiveCards/urbanDict.json");
-const rawPeopleCard = require("./adaptiveCards/peoplePicker.json");
 
 class TeamsBot extends TeamsActivityHandler {
   constructor() {
     super();
 
-    /*
     this.onMessage(async (context, next) => {
-      console.log("Running with Message Activity.");
       let txt = context.activity.text;
       let splitText = []
       const removedMentionText = TurnContext.removeRecipientMention(context.activity);
@@ -43,145 +33,41 @@ class TeamsBot extends TeamsActivityHandler {
             await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
           }
           break;
+        }       
+         default:
+          {
+            let reply = ''
+            for (let i = 0; i < txt.length; i++)
+            {
+              if ((i/2) % 1 === 0) //even
+              {
+                reply += txt[i].toUpperCase();
+              }
+              else
+              {
+                reply += txt[i].toLowerCase();
+              }
+            }
+          await context.sendActivity(reply);
+          }
         }
       }
 
       // By calling next() you ensure that the next BotHandler is run.
       await next();
     });
-    */
-
-    // Listen to MembersAdded event, view https://docs.microsoft.com/en-us/microsoftteams/platform/resources/bot-v3/bots-notifications for more events
-    this.onMembersAdded(async (context, next) => {
-      const membersAdded = context.activity.membersAdded;
-      let memberNameObj = {memberName: ' '}
-      for (let cnt = 0; cnt < membersAdded.length; cnt++) {
-        if (membersAdded[cnt].id) {
-          let member = await TeamsInfo.getMember(context, membersAdded[cnt].id);
-          if (member.givenName)
-          {memberNameObj.memberName = member.givenName;}
-          //render passes in an object of all dynamic variables within the card, they must be the same name as the ${varName} in the card
-          const card = cardTools.AdaptiveCards.declare(rawWelcomeCard).render(memberNameObj);  
-          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
-          break;
-        }
-      }
-      await next();
-    });
   }
-
-  // Invoked when an action is taken on an Adaptive Card. The Adaptive Card sends an event to the Bot and this
-  // method handles that event.
-  async onAdaptiveCardInvoke(context, invokeValue) {
-    // The verb "userlike" is sent from the Adaptive Card defined in adaptiveCards/learn.json
-    if (invokeValue.action.verb === "userlike") {
-      this.likeCountObj.likeCount++;
-      const card = cardTools.AdaptiveCards.declare(rawLearnCard).render(this.likeCountObj);
-      await context.updateActivity({
-        type: "message",
-        id: context.activity.replyToId,
-        attachments: [CardFactory.adaptiveCard(card)],
-      });
-      return { statusCode: 200 };
-    }
-    else if (invokeValue.action.verb == "assignTask") {
-      const title = invokeValue.action.data.taskTitle;
-      const desc = invokeValue.action.data.taskDescription;
-      const date = invokeValue.action.data.taskDate;
-      const time = invokeValue.action.data.taskTime;
-      const users = invokeValue.action.data.userID;
-      const meeting = {attendees: users, content: title, startTime: time};
-      
-    }
-  }
-
-  
 
   // Message extension Code
   // Action.
   handleTeamsMessagingExtensionSubmitAction(context, action) {
     switch (action.commandId) { //find where the task module is invoked <= fill input field 
-      case "createCard":
-        return createCardCommand(context, action);
-      case "shareMessage":
-        return shareMessageCommand(context, action);
       case "urbanDefine":
         return lookupCommand(context, action);
       default:
         throw new Error("NotImplemented");
     }
   }
-}
-function createCardCommand(context, action) {
-  // The user has chosen to create a card by choosing the 'Create Card' context menu command.
-  const data = action.data;
-  const heroCard = CardFactory.heroCard(data.title, data.text);
-  heroCard.content.subtitle = data.subTitle;
-  const attachment = {
-    contentType: heroCard.contentType,
-    content: heroCard.content,
-    preview: heroCard,
-  };
-
-  return {
-    composeExtension: {
-      type: "result",
-      attachmentLayout: "list",
-      attachments: [attachment],
-    },
-  };
-}
-
-function shareMessageCommand(context, action) {
-  // The user has chosen to share a message by choosing the 'Share Message' context menu command.
-  let userName = "unknown";
-  if (
-    action.messagePayload &&
-    action.messagePayload.from &&
-    action.messagePayload.from.user &&
-    action.messagePayload.from.user.displayName
-  ) {
-    userName = action.messagePayload.from.user.displayName;
-  }
-
-  // This Message Extension example allows the user to check a box to include an image with the
-  // shared message.  This demonstrates sending custom parameters along with the message payload.
-  let images = [];
-  const includeImage = action.data.includeImage;
-  if (includeImage === "true") {
-    images = [
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtB3AwMUeNoq4gUBGe6Ocj8kyh3bXa9ZbV7u1fVKQoyKFHdkqU",
-    ];
-  }
-  const heroCard = CardFactory.heroCard(
-    `${userName} originally sent this message:`,
-    action.messagePayload.body.content,
-    images
-  );
-
-  if (
-    action.messagePayload &&
-    action.messagePayload.attachment &&
-    action.messagePayload.attachments.length > 0
-  ) {
-    // This sample does not add the MessagePayload Attachments.  This is left as an
-    // exercise for the user.
-    heroCard.content.subtitle = `(${action.messagePayload.attachments.length} Attachments not included)`;
-  }
-
-  const attachment = {
-    contentType: heroCard.contentType,
-    content: heroCard.content,
-    preview: heroCard,
-  };
-
-  return {
-    composeExtension: {
-      type: "result",
-      attachmentLayout: "list",
-      attachments: [attachment],
-    },
-  };
 }
 
 async function lookupCommand(context, action) {
