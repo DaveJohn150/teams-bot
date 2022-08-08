@@ -303,7 +303,7 @@ async function lookup(word){
   //local env for api keys - not for deploy to azure
 let urbanDictionaryAPIKey = process.env.URBAN_API; 
 
-if (typeof urbanDictionaryAPIKey !== "undefined" | urbanDictionaryAPIKey.trim() == ''){
+if (typeof urbanDictionaryAPIKey === "undefined" | urbanDictionaryAPIKey.trim() == ''){
   console.error('No API key detected');
   exit();
 }
