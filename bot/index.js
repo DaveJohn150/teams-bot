@@ -15,17 +15,17 @@ const adapter = new BotFrameworkAdapter({
   appPassword: process.env.BOT_PASSWORD, //
 });
 
-//adapter.onTurnError = async (context, error) => {
+adapter.onTurnError = async (context, error) => {
   // This check writes out errors to console log .vs. app insights.
   // NOTE: In production environment, you should consider logging this to Azure
   //       application insights. See https://aka.ms/bottelemetry for telemetry
   //       configuration instructions.
-//  console.error(`\n [onTurnError] unhandled error: ${error}`);
+  console.error(`\n [onTurnError] unhandled error: ${error}`);
 
   // Send a message to the user
 //  await context.sendActivity(`The bot encountered an unhandled error:\n ${error.message}`);
 //  await context.sendActivity("To continue to run this bot, please fix the bot source code.");
-//};
+};
 
 // Create the bot that will handle incoming messages.
 const bot = new TeamsBot();
@@ -45,7 +45,8 @@ server.post("/api/messages", async (req, res) => {
 });
 
 server.post("/api/webhook", async (req, res) => {
-  console.log('webhook only?')
+  bot.handleWebhook(req.body); //function in teamsBot.js to handle stuff
+  res.json({});
 });
 
 // Gracefully shutdown HTTP server

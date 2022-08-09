@@ -1,5 +1,5 @@
 {
-    "name": "message extension",
+    "name": "Thruntron",
     "version": "0.0.1",
     "description": "",
     "author": "",
@@ -11,6 +11,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "dotenv": "^16.0.1"
+        "dotenv": "^16.0.1",
+        "envfile": "^6.17.0"
     }
 }
