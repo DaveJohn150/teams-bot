@@ -45,7 +45,7 @@ server.post("/api/messages", async (req, res) => {
 });
 
 server.post("/api/webhook", async (req, res) => {
-  bot.handleWebhook(req.body); //function in teamsBot.js to handle stuff
+  await bot.handleWebhook(req); //function in teamsBot.js to handle stuff
   res.json({});
 });
 
