@@ -32,15 +32,20 @@ const bot = new TeamsBot();
 
 // Create HTTP server.
 const server = restify.createServer();
+server.use(restify.plugins.bodyParser());
 server.listen(process.env.port || process.env.PORT || 3978, function () {
   console.log(`\nBot started, ${server.name} listening to ${server.url}`);
 });
 
 // Listen for incoming requests.
 server.post("/api/messages", async (req, res) => {
-  await adapter.processActivity(req, res, async (context) => {
-    await bot.run(context);
-  });
+    await adapter.processActivity(req, res, async (context) => {
+      await bot.run(context);
+    });
+});
+
+server.post("/api/webhook", async (req, res) => {
+  console.log('webhook only?')
 });
 
 // Gracefully shutdown HTTP server
