@@ -147,6 +147,15 @@ class TeamsBot extends TeamsActivityHandler {
         throw new Error("NotImplemented");
     }
   }
+  async handleTeamsMessagingExtensionSelectItem(context, obj) {
+    return {
+      composeExtension: {
+        type: "result",
+        attachmentLayout: "list",
+        attachments: [CardFactory.heroCard(obj.name, obj.description)],
+      },
+    };
+  }
 }
 
 function createCardCommand(context, action) {
