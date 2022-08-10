@@ -1,57 +1,82 @@
-// index.js is used to setup and configure your bot
-
-// Import required packages
+const notificationTemplate = require("./adaptiveCards/notification-default.json");
+const { bot } = require("./internal/initialize");
+const { AdaptiveCards } = require("@microsoft/adaptivecards-tools");
 const restify = require("restify");
 
-// Import required bot services.
-// See https://aka.ms/bot-services to learn more about the different parts of a bot.
-const { BotFrameworkAdapter } = require("botbuilder");
-const { TeamsBot } = require("./teamsBot");
-
-// Create adapter.
-// See https://aka.ms/about-bot-adapter to learn more about adapters.
-const adapter = new BotFrameworkAdapter({
-  appId: process.env.BOT_ID,
-  appPassword: process.env.BOT_PASSWORD, //
-});
-
-adapter.onTurnError = async (context, error) => {
-  // This check writes out errors to console log .vs. app insights.
-  // NOTE: In production environment, you should consider logging this to Azure
-  //       application insights. See https://aka.ms/bottelemetry for telemetry
-  //       configuration instructions.
-  console.error(`\n [onTurnError] unhandled error: ${error}`);
-
-  // Send a message to the user
-//  await context.sendActivity(`The bot encountered an unhandled error:\n ${error.message}`);
-//  await context.sendActivity("To continue to run this bot, please fix the bot source code.");
-};
-
-// Create the bot that will handle incoming messages.
-const bot = new TeamsBot();
 
 // Create HTTP server.
 const server = restify.createServer();
-server.use(restify.plugins.bodyParser());
-server.listen(process.env.port || process.env.PORT || 3978, function () {
-  console.log(`\nBot started, ${server.name} listening to ${server.url}`);
+server.listen(process.env.port || process.env.PORT || 3978, () => {
+  console.log(`\nBot Started, ${server.name} listening to ${server.url}`);
 });
 
-// Listen for incoming requests.
+// HTTP trigger to send notification. You need to add authentication / authorization for this API. Refer https://aka.ms/teamsfx-notification for more details.
+server.post(
+  "/api/notification",
+  restify.plugins.queryParser(),
+  restify.plugins.bodyParser(),
+  async (req, res) => {
+    for (const target of await bot.notification.installations()) {
+      await target.sendAdaptiveCard(
+        AdaptiveCards.declare(notificationTemplate).render({
+          title: "New Event Occurred!",
+          appName: "Contoso App Notification",
+          description: `This is a sample http-triggered notification to ${target.type}`,
+          notificationUrl: "https://www.adaptivecards.io/",
+        })
+      );
+    }
+
+    /****** To distinguish different target types ******/
+    /** "Channel" means this bot is installed to a Team (default to notify General channel)
+    if (target.type === "Channel") {
+      // Directly notify the Team (to the default General channel)
+      await target.sendAdaptiveCard(...);
+
+      // List all channels in the Team then notify each channel
+      const channels = await target.channels();
+      for (const channel of channels) {
+        await channel.sendAdaptiveCard(...);
+      }
+
+      // List all members in the Team then notify each member
+      const members = await target.members();
+      for (const member of members) {
+        await member.sendAdaptiveCard(...);
+      }
+    }
+    **/
+
+    /** "Group" means this bot is installed to a Group Chat
+    if (target.type === "Group") {
+      // Directly notify the Group Chat
+      await target.sendAdaptiveCard(...);
+
+      // List all members in the Group Chat then notify each member
+      const members = await target.members();
+      for (const member of members) {
+        await member.sendAdaptiveCard(...);
+      }
+    }
+    **/
+
+    /** "Person" means this bot is installed as a Personal app
+    if (target.type === "Person") {
+      // Directly notify the individual person
+      await target.sendAdaptiveCard(...);
+    }
+    **/
+
+    res.json({});
+  }
+);
+
+// Message handler.
 server.post("/api/messages", async (req, res) => {
-    await adapter.processActivity(req, res, async (context) => {
-      await bot.run(context);
-    });
-});
-
-server.post("/api/webhook", async (req, res) => {
-  await bot.handleWebhook(req); //function in teamsBot.js to handle stuff
-  res.json({});
-});
-
-// Gracefully shutdown HTTP server
-["exit", "uncaughtException", "SIGINT", "SIGTERM", "SIGUSR1", "SIGUSR2"].forEach((event) => {
-  process.on(event, () => {
-    server.close();
-  });
+  await bot.requestHandler(req, res, async (context) => {
+          await bot.activityHandler.run(context);
+       });
+  // await bot.adapter.processActivity(req, res, async (context) => {
+  //   await bot.activityHandler.run(context) does the same thing
+  // })
 });

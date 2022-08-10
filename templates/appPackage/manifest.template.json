@@ -31,11 +31,10 @@
                 "team",
                 "groupchat"
             ],
-            "supportsFiles": true,
+            "supportsFiles": false,
             "isNotificationOnly": false
         }
     ],
-
     "configurableTabs": [],
     "staticTabs": [],
     "permissions": [
