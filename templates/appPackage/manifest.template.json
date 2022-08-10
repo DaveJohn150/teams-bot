@@ -32,7 +32,88 @@
                 "groupchat"
             ],
             "supportsFiles": false,
-            "isNotificationOnly": false
+            "isNotificationOnly": false,
+            "commandLists": [
+                {
+                    "scopes": [
+                        "personal",
+                        "team",
+                        "groupchat"
+                    ],
+                    "commands": [
+                        {
+                            "title": "welcome",
+                            "description": "Resend welcome card of this Bot"
+                        },
+                        {
+                            "title": "learn",
+                            "description": "Learn about Adaptive Card and Bot Command"
+                        },
+                        {
+                            "title": "cats",
+                            "description": "Sends 3 cats in a carousel format."
+                        },
+                        {
+                            "title": "ud",
+                            "description": "Looks up term written after ud."
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "composeExtensions": [
+        {
+            "botId": "{{state.fx-resource-bot.botId}}",
+            "commands": [
+                {
+                    "id": "shareMessage",
+                    "context": [
+                        "message"
+                    ],
+                    "description": "Test command to run action on message context (message sharing)",
+                    "title": "Share Message",
+                    "type": "action",
+                    "parameters": [
+                        {
+                            "name": "includeImage",
+                            "title": "Include Image",
+                            "description": "Include image in Hero Card",
+                            "inputType": "toggle"
+                        }
+                    ]
+                },
+                {
+                    "id": "urbanDefine",
+                    "initialRun": true,
+                    "context": [
+                        "compose",
+                        "commandBox", 
+                        "message"
+                    ],
+                    "description": "Command to run action to look up definition on urban dictionary",
+                    "title": "Urban Dictionary Lookup",
+                    "type": "action",
+                    "parameters": [
+                      {
+                        "name": "searchWord",
+                        "title": "Search Word",
+                        "description": "The word to search the definition",
+                        "inputType": "text"
+                      }
+                    ]
+                }
+            ],
+            "messageHandlers": [
+                {
+                    "type": "link",
+                    "value": {
+                        "domains": [
+                            "*.botframework.com"
+                        ]
+                    }
+                }
+            ]
         }
     ],
     "configurableTabs": [],
