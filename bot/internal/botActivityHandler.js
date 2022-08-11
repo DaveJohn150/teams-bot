@@ -115,13 +115,16 @@ await context.sendActivity('I have been added, hello!');
     });
       //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
     this.onMembersRemoved(async (context, next) => {
-      const membersRemoved = context.activity.membersRemoved;
-      for (let i = 0; i < membersRemoved.length; i++)
-      { 
-      //  let name = await TeamsInfo.getMember(context, membersRemoved[i].id); //this does not work
-      //  await context.sendActivity("Seeya " + name)
-      await context.sendActivity("Someone has been removed from the team.")
+      // const membersRemoved = context.activity.membersRemoved;
+      // for (let i = 0; i < membersRemoved.length; i++)
+      // { 
+      try {
+        await context.sendActivity("Someone has been removed from the team.");
       }
+      catch (err) {
+        //if bot was removed will trigger this function
+      }
+      // }
       await next();
     });
   }
