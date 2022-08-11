@@ -4,7 +4,7 @@
     "manifest": {
         "appName": {
             "short": "Thruntron-local-debug",
-            "full": "Full name for message extension-local-debug"
+            "full": "Full name for bot"
         }
     }
 }

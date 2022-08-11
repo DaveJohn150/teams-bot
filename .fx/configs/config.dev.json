@@ -4,7 +4,7 @@
     "manifest": {
         "appName": {
             "short": "Thruntron",
-            "full": "Full name for message extension"
+            "full": "Full name for bot"
         }
     }
 }
