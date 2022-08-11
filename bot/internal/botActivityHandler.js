@@ -23,6 +23,10 @@ class botActivityHandler extends TeamsActivityHandler {
     this.onMessage(async (context, next) => {
       console.log("Running with Message Activity.");
       let txt = context.activity.text;
+      if (typeof txt === 'undefined'){
+        await next();
+        return;
+      }
       let splitText = []
       const removedMentionText = TurnContext.removeRecipientMention(context.activity);
       if (removedMentionText) {
@@ -91,6 +95,7 @@ class botActivityHandler extends TeamsActivityHandler {
     this.onMembersAdded(async (context, next) => {
       const membersAdded = context.activity.membersAdded;
       let memberNameObj = {memberName: ''}
+      try {
       for (let cnt = 0; cnt < membersAdded.length; cnt++) {
         if (membersAdded[cnt].id) {
           let member = await TeamsInfo.getMember(context, membersAdded[cnt].id);
@@ -102,6 +107,10 @@ class botActivityHandler extends TeamsActivityHandler {
           break;
         }
       }
+    }
+    catch (err) {
+await context.sendActivity('I have been added, hello!');
+    }
       await next();
     });
       //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
@@ -258,7 +267,7 @@ String(word);
           definition: result.definition,
           example: result.example,
           author: result.author,
-          date: result.written_on.substring(0,10), //need to use Date() function to make it readable format
+          date: result.written_on.substring(0,10),
           likes: result.thumbs_up,
           dislikes: result.thumbs_down,
           viewUrl: result.permalink

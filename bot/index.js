@@ -73,10 +73,15 @@ server.post(
 
 // Message handler.
 server.post("/api/messages", async (req, res) => {
+  try{
   await bot.requestHandler(req, res, async (context) => {
           await bot.activityHandler.run(context);
        });
   // await bot.adapter.processActivity(req, res, async (context) => {
-  //   await bot.activityHandler.run(context) does the same thing
+  //   await bot.activityHandler.run(context);
   // })
+      }
+      catch (err){
+        res.json(400, {text: "Invalid message format"})
+      }
 });

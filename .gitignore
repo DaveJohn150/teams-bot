@@ -2,6 +2,7 @@
 node_modules
 .fx/configs/localSettings.json
 .fx/states/*.userdata
+.fx/states/state.dev.json
 .DS_Store
 .env.teamsfx.local
 subscriptionInfo.json
