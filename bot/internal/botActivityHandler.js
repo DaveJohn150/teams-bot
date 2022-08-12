@@ -75,11 +75,11 @@ class botActivityHandler extends TeamsActivityHandler {
             {
               if ((i/2) % 1 === 0) //even
               {
-                reply += txt[i].toUpperCase();
+                reply += txt[i].toLowerCase();
               }
               else
               {
-                reply += txt[i].toLowerCase();
+                reply += txt[i].toUpperCase();
               }
             }
           await context.sendActivity(reply);

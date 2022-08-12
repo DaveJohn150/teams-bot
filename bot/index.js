@@ -16,58 +16,43 @@ server.post(
   restify.plugins.queryParser(),
   restify.plugins.bodyParser(),
   async (req, res) => {
+    try{
+    if (!req.headers.apikey){
+      throw 'Missing API header';
+    }
+    else if (req.headers.apikey != 'giggity'){ //make it check if the api key matches wherever they are stored
+      throw 'Invalid API key';
+    }
+      //maybe check if they have a key n stuff that would be good stuff
     for (const target of await bot.notification.installations()) {
+      console.log(req.body)
+      message = JSON.parse(req.body)
       await target.sendAdaptiveCard(
         AdaptiveCards.declare(notificationTemplate).render({
-          title: "New Event Occurred!",
-          appName: "Contoso App Notification",
-          description: `This is a sample http-triggered notification to ${target.type}`,
-          notificationUrl: "https://www.adaptivecards.io/",
+          title: message.title,
+          appName: message.appName,
+          description: message.description
         })
       );
     }
-
-    /****** To distinguish different target types ******/
-    /** "Channel" means this bot is installed to a Team (default to notify General channel)
-    if (target.type === "Channel") {
-      // Directly notify the Team (to the default General channel)
-      await target.sendAdaptiveCard(...);
-
-      // List all channels in the Team then notify each channel
-      const channels = await target.channels();
-      for (const channel of channels) {
-        await channel.sendAdaptiveCard(...);
-      }
-
-      // List all members in the Team then notify each member
-      const members = await target.members();
-      for (const member of members) {
-        await member.sendAdaptiveCard(...);
-      }
+  }
+  catch (err){
+    console.log(err)
+    if (err == 'Missing API header'){
+      res.json(400, {errorMessage: 'Missing apikey header'});
+      return;
     }
-    **/
-
-    /** "Group" means this bot is installed to a Group Chat
-    if (target.type === "Group") {
-      // Directly notify the Group Chat
-      await target.sendAdaptiveCard(...);
-
-      // List all members in the Group Chat then notify each member
-      const members = await target.members();
-      for (const member of members) {
-        await member.sendAdaptiveCard(...);
-      }
+    else if (err == 'Invalid API key'){
+      res.json(401, {errorMessage: 'Invalid API key'});
+      return;
     }
-    **/
-
-    /** "Person" means this bot is installed as a Personal app
-    if (target.type === "Person") {
-      // Directly notify the individual person
-      await target.sendAdaptiveCard(...);
+    else{
+    res.json(400, {errorMessage:  
+      'Requires JSON {title: "title of notification", appName: "name of origin app", description: "description of notification""}'});
+      return;
     }
-    **/
-
-    res.json({});
+  }
+    res.json(200, {});
   }
 );
 
@@ -78,10 +63,12 @@ server.post("/api/messages", async (req, res) => {
           await bot.activityHandler.run(context);
        });
   // await bot.adapter.processActivity(req, res, async (context) => {
-  //   await bot.activityHandler.run(context);
+  //   await bot.activityHandler.run(context) does the same thing
   // })
       }
-      catch (err){
-        res.json(400, {text: "Invalid message format"})
+      catch{
+        //if a post occurs to the api/messages that isnt a proper teams message itll throw errors
       }
 });
+
+

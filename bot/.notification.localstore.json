@@ -1,0 +1,23 @@
+{
+  "_b79c6d89-0869-4a3a-aa58-4a822ce2daa5_19:4nnb5pegGl6aqWT12poeQtc0ESFrFauPHuoi9T1QOo81@thread.tacv2": {
+    "activityId": "1660277673003",
+    "user": {
+      "id": "29:1UnimmAFP2xmD4DdLd240nMoQgQ5yShErfgQVLB3frwmxDHJ7KRg4pj3BtNGn7i1U5ql-p0VUubDQLG_YV0l1pQ",
+      "name": "David JOHNSTON",
+      "aadObjectId": "ad41c663-fc54-4748-8b9d-cce1b0b41881"
+    },
+    "bot": {
+      "id": "28:5cc033d5-1828-41d5-bc97-611f487541ae",
+      "name": "thruntron-local-debug"
+    },
+    "conversation": {
+      "isGroup": true,
+      "conversationType": "channel",
+      "tenantId": "b79c6d89-0869-4a3a-aa58-4a822ce2daa5",
+      "id": "19:4nnb5pegGl6aqWT12poeQtc0ESFrFauPHuoi9T1QOo81@thread.tacv2"
+    },
+    "channelId": "msteams",
+    "locale": "en-US",
+    "serviceUrl": "https://smba.trafficmanager.net/amer/"
+  }
+}
