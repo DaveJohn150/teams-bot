@@ -114,7 +114,10 @@ class botActivityHandler extends TeamsActivityHandler {
         }
       }
       await next();
-    });
+    }
+    catch (err)
+    {console.log(err)}
+  });
       //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
     this.onMembersRemoved(async (context, next) => {
       // const membersRemoved = context.activity.membersRemoved;
