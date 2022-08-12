@@ -25,12 +25,5 @@
       "isSubtle": true,
       "wrap": true
     }
-  ],
-  "actions": [
-    {
-      "type": "Action.OpenUrl",
-      "title": "View Details",
-      "url": "${notificationUrl}"
-    }
   ]
 }

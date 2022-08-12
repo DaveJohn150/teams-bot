@@ -8,6 +8,7 @@ subscriptionInfo.json
 build
 #.fx/configs/config.local.json
 .fx/states/state.local.json
+.fx/states/state.dev.json
 bot/urbanAPIKey.txt
 .env
 .env.teamsfx.local

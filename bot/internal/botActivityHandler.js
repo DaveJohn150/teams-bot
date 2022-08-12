@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInfo, ActivityFactory } = require("botbuilder");
-require('dotenv').config('./.env');
+require('dotenv').config();
 const cardTools = require("@microsoft/adaptivecards-tools");
 const { exit } = require("process");
 
@@ -11,6 +11,7 @@ const rawCat1Card = require("../adaptiveCards/cat1.json");
 const rawCat2Card = require("../adaptiveCards/cat2.json");
 const rawCat3Card = require("../adaptiveCards/cat3.json");
 const rawDictCard = require("../adaptiveCards/urbanDict.json");
+const { stringify } = require("querystring");
 
 class botActivityHandler extends TeamsActivityHandler { 
   constructor() {
@@ -54,7 +55,12 @@ class botActivityHandler extends TeamsActivityHandler {
           }
           else {
             const card = await lookup(txt.substring(3)); //passes txt without "ud " - doesnt use aplitText[1] in case of multi word search e.g. "big dog"
-            await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
+            if (card.content){
+              await context.sendActivity({attachments: [CardFactory.adaptiveCard(card.content)]});
+            }
+            else {
+              await context.sendActivity(card)
+            }
           }
           break;
         }
@@ -71,11 +77,11 @@ class botActivityHandler extends TeamsActivityHandler {
             {
               if ((i/2) % 1 === 0) //even
               {
-                reply += txt[i].toUpperCase();
+                reply += txt[i].toLowerCase();
               }
               else
               {
-                reply += txt[i].toLowerCase();
+                reply += txt[i].toUpperCase();
               }
             }
           await context.sendActivity(reply);
@@ -91,6 +97,7 @@ class botActivityHandler extends TeamsActivityHandler {
     this.onMembersAdded(async (context, next) => {
       const membersAdded = context.activity.membersAdded;
       let memberNameObj = {memberName: ''}
+      try {
       for (let cnt = 0; cnt < membersAdded.length; cnt++) {
         if (membersAdded[cnt].id) {
           let member = await TeamsInfo.getMember(context, membersAdded[cnt].id);
@@ -102,6 +109,8 @@ class botActivityHandler extends TeamsActivityHandler {
           break;
         }
       }
+    }
+    catch {}
       await next();
     });
       //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
@@ -212,10 +221,13 @@ function shareMessageCommand(context, action) {
 async function lookupCommand(context, action) {
   let resultCard;
   if (typeof action.data.searchWord === "undefined"){
-    resultCard = CardFactory.heroCard(`There is no Urban Dictionary definition for ${action.data.searchWord}`)
+    return CardFactory.heroCard('An error occurred')
   }
   else
   {resultCard = await lookup(action.data.searchWord.trim())}
+  if(typeof resultCard === 'string'){
+    resultCard = CardFactory.heroCard(`There is no Urban Dictionary definition for ${action.data.searchWord}`)
+  }
   return {
     composeExtension: {
       type: "result",
@@ -253,34 +265,34 @@ String(word);
           //console.log(response.data.list[0]);
       result = response.data.list[0];
       if (result != [] & typeof result !== "undefined"){
-        let urbanDefinition = {
+        var urbanDefinition = {
           word: result.word,
-          definition: result.definition,
+          definition: result.definition, 
           example: result.example,
           author: result.author,
           date: result.written_on.substring(0,10), //need to use Date() function to make it readable format
           likes: result.thumbs_up,
           dislikes: result.thumbs_down,
           viewUrl: result.permalink
-        }
-        urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\\[|\\]', 'g'), ''); //all hyperlinked words are nested into square brackets, removes them
-        urbanDefinition.definition = urbanDefinition.definition.replaceAll(RegExp('\r', 'g'), '\n'); //cards dont do anything with /r/n, only /n/n
+        }        
+        if(typeof urbanDefinition.definition === 'string'){
+          urbanDefinition.definition = urbanDefinition.definition.replace(RegExp('\\[|\\]', 'g'), ''); //all hyperlinked words are nested into square brackets, removes them
+        urbanDefinition.definition = urbanDefinition.definition.replace(RegExp('\r', 'g'), '\n'); //cards dont do anything with /r/n, only /n/n
         urbanDefinition.example = urbanDefinition.example.replace(RegExp('\\[|\\]', 'g'), '');
         urbanDefinition.example = urbanDefinition.example.replace(RegExp('\r', 'g'), '\n');
+      }
         card = cardTools.AdaptiveCards.declare(rawDictCard).render(urbanDefinition);
-        return card;
+       return card;
       }
       else{
-        card = CardFactory.heroCard(
-          `There is no Urban Dictionary definition for ${action.data.searchWord}`
-        );
-        return card;
+       throw 'no def';
       }
   }).catch(error => {
       console.error(error);
-      return;
+      card = `There is no Urban Dictionary definition for ${word}`
+      return card;
   });
   return card;
-}
+} 
 
 module.exports.botActivityHandler = botActivityHandler;

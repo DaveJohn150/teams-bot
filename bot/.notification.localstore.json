@@ -1,0 +1,43 @@
+{
+  "_b79c6d89-0869-4a3a-aa58-4a822ce2daa5_19:9133e6fc03d94189aad4c9cb639d765b@thread.tacv2": {
+    "activityId": "1660198695124",
+    "user": {
+      "id": "29:1UnimmAFP2xmD4DdLd240nMoQgQ5yShErfgQVLB3frwmxDHJ7KRg4pj3BtNGn7i1U5ql-p0VUubDQLG_YV0l1pQ",
+      "name": "David JOHNSTON",
+      "aadObjectId": "ad41c663-fc54-4748-8b9d-cce1b0b41881"
+    },
+    "bot": {
+      "id": "28:5cc033d5-1828-41d5-bc97-611f487541ae",
+      "name": "messageextension-local-debug"
+    },
+    "conversation": {
+      "isGroup": true,
+      "conversationType": "channel",
+      "tenantId": "b79c6d89-0869-4a3a-aa58-4a822ce2daa5",
+      "id": "19:9133e6fc03d94189aad4c9cb639d765b@thread.tacv2"
+    },
+    "channelId": "msteams",
+    "locale": "en-US",
+    "serviceUrl": "https://smba.trafficmanager.net/amer/"
+  },
+  "_b79c6d89-0869-4a3a-aa58-4a822ce2daa5_a:1La_9FRbFq4Ug75RtOtwXqfsRm-6ze56YjGsRqtEdL46E4EVF2LTfNWUI7oMYw2R3ZRHat73dhM4gxS5I3qtOCBnoKGsFgi3UDUrH_YxbQT78ev79-09dSojssaepjlMk": {
+    "activityId": "1660202456792",
+    "user": {
+      "id": "29:1UnimmAFP2xmD4DdLd240nMoQgQ5yShErfgQVLB3frwmxDHJ7KRg4pj3BtNGn7i1U5ql-p0VUubDQLG_YV0l1pQ",
+      "name": "David JOHNSTON",
+      "aadObjectId": "ad41c663-fc54-4748-8b9d-cce1b0b41881"
+    },
+    "bot": {
+      "id": "28:5cc033d5-1828-41d5-bc97-611f487541ae",
+      "name": "messageextension-local-debug"
+    },
+    "conversation": {
+      "conversationType": "personal",
+      "tenantId": "b79c6d89-0869-4a3a-aa58-4a822ce2daa5",
+      "id": "a:1La_9FRbFq4Ug75RtOtwXqfsRm-6ze56YjGsRqtEdL46E4EVF2LTfNWUI7oMYw2R3ZRHat73dhM4gxS5I3qtOCBnoKGsFgi3UDUrH_YxbQT78ev79-09dSojssaepjlMk"
+    },
+    "channelId": "msteams",
+    "locale": "en-US",
+    "serviceUrl": "https://smba.trafficmanager.net/amer/"
+  }
+}
