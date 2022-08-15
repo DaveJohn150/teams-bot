@@ -1,0 +1,33 @@
+{
+    "appName": "message extension",
+    "projectId": "ebc33620-4bab-4a2c-8226-c8ba30532013",
+    "version": "2.1.0",
+    "isFromSample": false,
+    "solutionSettings": {
+        "name": "fx-solution-azure",
+        "version": "1.0.0",
+        "hostType": "Azure",
+        "azureResources": [],
+        "capabilities": [
+            "MessagingExtension",
+            "Bot"
+        ],
+        "activeResourcePlugins": [
+            "fx-resource-identity",
+            "fx-resource-bot",
+            "fx-resource-local-debug",
+            "fx-resource-appstudio",
+            "fx-resource-cicd",
+            "fx-resource-api-connector"
+        ]
+    },
+    "programmingLanguage": "javascript",
+    "pluginSettings": {
+        "fx-resource-bot": {
+            "host-type": "app-service",
+            "capabilities": [
+                "message-extension"
+            ]
+        }
+    }
+}
