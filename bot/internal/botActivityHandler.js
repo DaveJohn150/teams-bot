@@ -11,7 +11,6 @@ const rawCat1Card = require("../adaptiveCards/cat1.json");
 const rawCat2Card = require("../adaptiveCards/cat2.json");
 const rawCat3Card = require("../adaptiveCards/cat3.json");
 const rawDictCard = require("../adaptiveCards/urbanDict.json");
-const { stringify } = require("querystring");
 
 class botActivityHandler extends TeamsActivityHandler { 
   constructor() {
@@ -35,6 +34,12 @@ class botActivityHandler extends TeamsActivityHandler {
         txt = removedMentionText.toLowerCase().replace(/\n|\r/g, "").trim();
         splitText = txt.split(' ')
       }
+
+      // //send to python service
+      // let secretSpying = {text: removedMentionText, timestamp: context.activity.timestamp, userName: context.activity.from.name, 
+      //   conversationType: context.activity.conversation.conversationType, conversationID: context.activity.conversation.id};
+      // await axios.post('http://yomama:200', secretSpying, {'Content-Type':'application/json'})        
+
 
       // Trigger command by IM text
       switch (splitText[0]) {
@@ -118,7 +123,7 @@ class botActivityHandler extends TeamsActivityHandler {
     catch (err)
     {console.log(err)}
   });
-      //membersAdded and membersRemoved do not have .name, only .id which is a big dumb
+      //membersAdded and membersRemoved do not have .name, only .id
     this.onMembersRemoved(async (context, next) => {
       // const membersRemoved = context.activity.membersRemoved;
       // for (let i = 0; i < membersRemoved.length; i++)
@@ -127,7 +132,7 @@ class botActivityHandler extends TeamsActivityHandler {
         await context.sendActivity("Someone has been removed from the team.");
       }
       catch (err) {
-        //if bot was removed will trigger this function
+        //if bot was removed will trigger the memberRemoved function
       }
       // }
       await next();

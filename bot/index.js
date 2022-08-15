@@ -22,7 +22,7 @@ server.post(
     if (!req.headers.apikey){
       throw 'Missing API header';
     }
-    else if (req.headers.apikey != process.env('BOTAPI')){ //make it check if the api key matches wherever they are stored
+    else if (req.headers.apikey != process.env.BOTAPI){ //make it check if the api key matches wherever they are stored
       throw 'Invalid API key';
     }
       //maybe check if they have a key n stuff that would be good stuff
@@ -57,6 +57,15 @@ server.post(
     res.json(200, {});
   }
 );
+
+server.post(
+  "/api/alert",
+  restify.plugins.queryParser(),
+  restify.plugins.bodyParser(),
+  async (req, res) => {
+    try{console.log(req.body)}
+    catch (err){console.log(err)}
+  })
 
 // Message handler.
 server.post("/api/messages", async (req, res) => {
