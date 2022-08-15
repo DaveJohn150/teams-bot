@@ -26,7 +26,7 @@ server.post(
       //maybe check if they have a key n stuff that would be good stuff
     for (const target of await bot.notification.installations()) {
       console.log(req.body)
-      message = JSON.parse(req.body)
+      message = req.body //azure receives them as actual JSON
       await target.sendAdaptiveCard(
         AdaptiveCards.declare(notificationTemplate).render({
           title: message.title,
