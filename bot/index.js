@@ -2,6 +2,8 @@ const notificationTemplate = require("./adaptiveCards/notification-default.json"
 const { bot } = require("./internal/initialize");
 const { AdaptiveCards } = require("@microsoft/adaptivecards-tools");
 const restify = require("restify");
+require('dotenv').config();
+
 
 
 // Create HTTP server.
@@ -20,7 +22,7 @@ server.post(
     if (!req.headers.apikey){
       throw 'Missing API header';
     }
-    else if (req.headers.apikey != 'giggity'){ //make it check if the api key matches wherever they are stored
+    else if (req.headers.apikey != process.env('BOTAPI')){ //make it check if the api key matches wherever they are stored
       throw 'Invalid API key';
     }
       //maybe check if they have a key n stuff that would be good stuff
