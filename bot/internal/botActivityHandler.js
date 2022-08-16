@@ -3,6 +3,7 @@ const { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, TeamsInf
 require('dotenv').config();
 const cardTools = require("@microsoft/adaptivecards-tools");
 const { exit } = require("process");
+const fs = require('fs');
 
 //import card templates
 const rawWelcomeCard = require("../adaptiveCards/welcome.json");
@@ -11,7 +12,9 @@ const rawCat1Card = require("../adaptiveCards/cat1.json");
 const rawCat2Card = require("../adaptiveCards/cat2.json");
 const rawCat3Card = require("../adaptiveCards/cat3.json");
 const rawDictCard = require("../adaptiveCards/urbanDict.json");
-
+const rawSuggestionCard = require("../adaptiveCards/suggestion.json");
+const rawNewSuggestionCard = require("../adaptiveCards/newSuggestion.json");
+const { fstat } = require("fs");
 class botActivityHandler extends TeamsActivityHandler { 
   constructor() {
     super();
@@ -39,6 +42,14 @@ class botActivityHandler extends TeamsActivityHandler {
       switch (splitText[0]) {
         case "welcome": {
           break;
+        }
+        case "createsuggestion": {
+          const card = cardTools.AdaptiveCards.declare(rawNewSuggestionCard).render();
+          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });        
+          break;
+        }
+        case "showsuggestions": {
+
         }
         /**
          * case "yourCommand": {
@@ -74,7 +85,30 @@ class botActivityHandler extends TeamsActivityHandler {
   // Invoked when an action is taken on an Adaptive Card. The Adaptive Card sends an event to the Bot and this
   // method handles that event.
   async onAdaptiveCardInvoke(context, invokeValue) {
-    
+    if (invokeValue.action.verb == "newSuggestion"){
+      console.log(invokeValue);
+      let allSuggestions = {}
+      fs.readFile("./suggestion-box.json", "utf8", (err, jsonstring) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        else {
+          allSuggestions= JSON.parse(jsonstring);
+        }
+      })
+      
+      if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){
+        allSuggestions[`_${context.activity.conversation.tenantId}_${context.actiivity.conversation.id}`].push(invokeValue.action.data.suggestion);
+      }
+      else {
+        // allSuggestions.push( JSON.parse(`{"_${context.activity.conversation.tenantId}_${context.activity.conversation.id}": [${invokeValue.action.data.suggestion}]}`));
+        let foo = 'cram';
+        let bar = 'those';
+        let tar = 'winz';
+        allSuggestions.push( JSON.parse(`{ "${foo}_${bar}": ["${tar}"] }`));
+      }
+    }
   }
 
   // Message extension Code
