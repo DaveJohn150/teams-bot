@@ -1,4 +1,5 @@
 const notificationTemplate = require("./adaptiveCards/notification-default.json");
+const notificationWithImage = require("./adaptiveCards/notificationWithAvatar.json");
 const { bot } = require("./internal/initialize");
 const { AdaptiveCards } = require("@microsoft/adaptivecards-tools");
 const restify = require("restify");
@@ -24,20 +25,30 @@ server.post(
     if (!req.headers.auth){
       throw 'Missing auth header';
     }
-    else if (req.headers.auth != process.env.BOTAUTH){ //make it check if the api key matches wherever they are stored
+    else if (req.headers.auth != process.env.BOTAUTH){ 
       throw 'Invalid API key';
     }
-      //maybe check if they have a key n stuff that would be good stuff
     for (const target of await bot.notification.installations()) {
-      console.log(req.body)
       message = req.body
-      await target.sendAdaptiveCard(
+      if (typeof message.avatar_url !== 'undefined')
+      {
+        await target.sendAdaptiveCard(
+          AdaptiveCards.declare(notificationWithImage).render({
+            title: message.title,
+            appName: message.appName,
+            description: message.content,
+            avatar_url: message.avatar_url
+          })
+        );
+      }
+      else 
+      {await target.sendAdaptiveCard(
         AdaptiveCards.declare(notificationTemplate).render({
           title: message.title,
           appName: message.appName,
           description: message.content
         })
-      );
+      );}
     }
   }
   catch (err){
