@@ -162,6 +162,7 @@ class botActivityHandler extends TeamsActivityHandler {
         id: context.activity.replyToId,
         attachments: [CardFactory.adaptiveCard(card)],
       });
+    }
     else if (invokeValue.action.verb == "newSuggestion"){
       let allSuggestions = {}
       try {
