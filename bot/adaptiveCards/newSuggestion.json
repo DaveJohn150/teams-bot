@@ -9,8 +9,14 @@
       },
       {
         "type": "Input.Text",
-        "id": "suggestion",
-        "placeholder": "Write a suggestion",
+        "id": "title",
+        "placeholder": "Suggestion title",
+        "isMultiline": false
+      },
+      {
+        "type": "Input.Text",
+        "id": "desc",
+        "placeholder": "Description",
         "isMultiline": true
       }
     ],

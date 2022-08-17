@@ -93,20 +93,15 @@ class botActivityHandler extends TeamsActivityHandler {
       }
       catch (err) {
         console.error(err);
+        return {statusCode: 500};
       }
-      if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){
-        let existing = false;
-        for(let i = 0; i<allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
-          if (allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`][i] == invokeValue.action.data.suggestion){
-            existing = true;
-          }
-        }
-        if (!existing) {        
-          allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].push(invokeValue.action.data.suggestion);
-        }
+      if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){     
+          allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].push(
+            JSON.stringify({title: invokeValue.action.data.title, desc: invokeValue.action.data.desc}));
       }
       else {
-        allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`]= [`${invokeValue.action.data.suggestion}`];
+        allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] = [
+          JSON.stringify({title: invokeValue.action.data.title, desc: invokeValue.action.data.desc})];
       }
       fs.writeFile("./suggestion-box.json", JSON.stringify(allSuggestions), (err) => {
         if (err){
