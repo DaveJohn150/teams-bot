@@ -50,7 +50,6 @@ class botActivityHandler extends TeamsActivityHandler {
         case "showsuggestions": {
           const cards = showSuggestions(context); //array of rendered cards sent by function
           if (typeof cards !== "undefined") {
-            let cat = rawCat1Card
             await context.sendActivity(MessageFactory.carousel(cards))
             break;
           }
@@ -93,8 +92,8 @@ class botActivityHandler extends TeamsActivityHandler {
   // Invoked when an action is taken on an Adaptive Card. The Adaptive Card sends an event to the Bot and this
   // method handles that event.
   async onAdaptiveCardInvoke(context, invokeValue) {
+    //create new sugggestion
     if (invokeValue.action.verb == "newSuggestion"){
-      //console.log(invokeValue);
       let allSuggestions = {}
       try {
         allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}))
@@ -103,9 +102,22 @@ class botActivityHandler extends TeamsActivityHandler {
         console.error(err);
         return {statusCode: 500};
       }
-      if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){     
-          allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].push(
+      if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){   
+        let exists = false; 
+        for(let i =0; i < allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
+          let suggestion = JSON.parse(allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`][i])
+          if (suggestion.title.toLowerCase() == invokeValue.action.data.title.toLowerCase()) {
+            exists = true;
+            break;
+          }
+        }
+          if (!exists) {
+            allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].push(  
             JSON.stringify({title: invokeValue.action.data.title, desc: invokeValue.action.data.desc}));
+          }
+          else {
+            await context.sendActivity("Suggestion already exists.")
+          }
       }
       else {
         allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] = [
@@ -118,6 +130,8 @@ class botActivityHandler extends TeamsActivityHandler {
       });
       return { statusCode: 200 };
     }
+
+    //delete suggestion
     else if (invokeValue.action.verb == "deleteSuggestion"){ //if suggestion already deleted it will do nothing
       let allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}));
       for(let i =0; i < allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
@@ -127,11 +141,16 @@ class botActivityHandler extends TeamsActivityHandler {
           break;
         }
       }
-      fs.writeFile("./suggestion-box.json", JSON.stringify(allSuggestions), (err) => {
-        if (err){
-          console.error(err);
-        }
-      });
+      try{
+      fs.writeFileSync("./suggestion-box.json", JSON.stringify(allSuggestions));
+      }
+      catch (err) {
+        console.log(err);
+      }
+      const cards = showSuggestions(context); //array of rendered cards sent by function
+      if (typeof cards !== "undefined") {
+        await context.sendActivity(MessageFactory.carousel(cards))
+      }
       return {statusCode: 200}
     }
     else{
