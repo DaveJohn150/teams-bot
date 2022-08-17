@@ -53,6 +53,10 @@ class botActivityHandler extends TeamsActivityHandler {
             let cat = rawCat1Card
             await context.sendActivity(MessageFactory.carousel(cards))
             break;
+          }
+          else{
+            await context.sendActivities("No suggestions detected");
+            break;
           }        
         }
         /**
@@ -114,8 +118,20 @@ class botActivityHandler extends TeamsActivityHandler {
       });
       return { statusCode: 200 };
     }
-    else if (invokeValue.action.verb == "deleteSuggestion"){
-      //delete from suggestion box
+    else if (invokeValue.action.verb == "deleteSuggestion"){ //if suggestion already deleted it will do nothing
+      let allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}));
+      for(let i =0; i < allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
+        let suggestion = JSON.parse(allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`][i])
+        if (suggestion.title == invokeValue.action.data.title){
+          allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].splice(i, 1);
+          break;
+        }
+      }
+      fs.writeFile("./suggestion-box.json", JSON.stringify(allSuggestions), (err) => {
+        if (err){
+          console.error(err);
+        }
+      });
       return {statusCode: 200}
     }
     else{
