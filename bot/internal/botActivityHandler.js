@@ -48,15 +48,8 @@ class botActivityHandler extends TeamsActivityHandler {
           break;
         }
         case "showsuggestions": {
-          const cards = showSuggestions(context); //array of rendered cards sent by function
-          if (typeof cards !== "undefined") {
-            await context.sendActivity(MessageFactory.carousel(cards))
-            break;
-          }
-          else{
-            await context.sendActivities("No suggestions detected");
-            break;
-          }        
+          await showSuggestions(context); //array of rendered cards sent by function   
+          break;
         }
         /**
          * case "yourCommand": {
@@ -147,10 +140,7 @@ class botActivityHandler extends TeamsActivityHandler {
       catch (err) {
         console.log(err);
       }
-      const cards = showSuggestions(context); //array of rendered cards sent by function
-      if (typeof cards !== "undefined") {
-        await context.sendActivity(MessageFactory.carousel(cards))
-      }
+      await showSuggestions(context);
       return {statusCode: 200}
     }
     else{
@@ -171,7 +161,7 @@ class botActivityHandler extends TeamsActivityHandler {
   }
 }
 
-function showSuggestions(context) {
+async function showSuggestions(context) {
   try {
     const allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}))
     let cardList = []
@@ -224,7 +214,21 @@ function showSuggestions(context) {
         )
       )
     }
-    return cardList;
+    if (cardList){
+      for(let max8 = 0; max8 < cardList.length; max8 += 8){
+        let subArray = cardList.slice(max8);
+        if (subArray.length > 8){
+          await context.sendActivity(MessageFactory.carousel(subArray.slice(0,8)))
+        }
+        else {
+          await context.sendActivity(MessageFactory.carousel(subArray))
+        }
+      }
+    }
+    else {
+      await context.sendActivity("No suggestions in suggestion box.")
+    }
+    return;
   }
   catch (err) {
     console.error(err);
