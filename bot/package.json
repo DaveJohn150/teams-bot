@@ -28,5 +28,9 @@
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.7"
+  },
+  "nodemonConfig": {
+    "ignore": ["./suggestion-box.json"],
+    "delay": 2500
   }
 }

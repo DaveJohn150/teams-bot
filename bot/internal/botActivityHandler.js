@@ -14,7 +14,7 @@ const rawCat3Card = require("../adaptiveCards/cat3.json");
 const rawDictCard = require("../adaptiveCards/urbanDict.json");
 const rawSuggestionCard = require("../adaptiveCards/suggestion.json");
 const rawNewSuggestionCard = require("../adaptiveCards/newSuggestion.json");
-const { fstat } = require("fs");
+
 class botActivityHandler extends TeamsActivityHandler { 
   constructor() {
     super();
@@ -86,28 +86,34 @@ class botActivityHandler extends TeamsActivityHandler {
   // method handles that event.
   async onAdaptiveCardInvoke(context, invokeValue) {
     if (invokeValue.action.verb == "newSuggestion"){
-      console.log(invokeValue);
+      //console.log(invokeValue);
       let allSuggestions = {}
-      fs.readFile("./suggestion-box.json", "utf8", (err, jsonstring) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        else {
-          allSuggestions= JSON.parse(jsonstring);
-        }
-      })
-      
+      try {
+        allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}))
+      }
+      catch (err) {
+        console.error(err);
+      }
       if(typeof allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`] !== "undefined"){
-        allSuggestions[`_${context.activity.conversation.tenantId}_${context.actiivity.conversation.id}`].push(invokeValue.action.data.suggestion);
+        let existing = false;
+        for(let i = 0; i<allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
+          if (allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`][i] == invokeValue.action.data.suggestion){
+            existing = true;
+          }
+        }
+        if (!existing) {        
+          allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].push(invokeValue.action.data.suggestion);
+        }
       }
       else {
-        // allSuggestions.push( JSON.parse(`{"_${context.activity.conversation.tenantId}_${context.activity.conversation.id}": [${invokeValue.action.data.suggestion}]}`));
-        let foo = 'cram';
-        let bar = 'those';
-        let tar = 'winz';
-        allSuggestions.push( JSON.parse(`{ "${foo}_${bar}": ["${tar}"] }`));
+        allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`]= [`${invokeValue.action.data.suggestion}`];
       }
+      fs.writeFile("./suggestion-box.json", JSON.stringify(allSuggestions), (err) => {
+        if (err){
+          console.error(err);
+        }
+      });
+      return { statusCode: 200 };
     }
   }
 
