@@ -1,4 +1,3 @@
-const { ConversationBot } = require("@microsoft/teamsfx");
 const {teamsBot} = require('./teamsBot');
 
 // Create bot.
