@@ -12,7 +12,6 @@ const rawCat1Card = require("../adaptiveCards/cat1.json");
 const rawCat2Card = require("../adaptiveCards/cat2.json");
 const rawCat3Card = require("../adaptiveCards/cat3.json");
 const rawDictCard = require("../adaptiveCards/urbanDict.json");
-const rawSuggestionCard = require("../adaptiveCards/suggestion.json");
 const rawNewSuggestionCard = require("../adaptiveCards/newSuggestion.json");
 
 class botActivityHandler extends TeamsActivityHandler { 
@@ -49,7 +48,12 @@ class botActivityHandler extends TeamsActivityHandler {
           break;
         }
         case "showsuggestions": {
-
+          const cards = showSuggestions(context); //array of rendered cards sent by function
+          if (typeof cards !== "undefined") {
+            let cat = rawCat1Card
+            await context.sendActivity(MessageFactory.carousel(cards))
+            break;
+          }        
         }
         /**
          * case "yourCommand": {
@@ -110,6 +114,13 @@ class botActivityHandler extends TeamsActivityHandler {
       });
       return { statusCode: 200 };
     }
+    else if (invokeValue.action.verb == "deleteSuggestion"){
+      //delete from suggestion box
+      return {statusCode: 200}
+    }
+    else{
+      return {statusCode: 500}
+    }
   }
 
   // Message extension Code
@@ -122,6 +133,67 @@ class botActivityHandler extends TeamsActivityHandler {
     return {
       
     };
+  }
+}
+
+function showSuggestions(context) {
+  try {
+    const allSuggestions = JSON.parse(fs.readFileSync("./suggestion-box.json", {endcoding: "utf8",}))
+    let cardList = []
+    for(let i =0; i < allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`].length; i++){
+      let suggestion = JSON.parse(allSuggestions[`_${context.activity.conversation.tenantId}_${context.activity.conversation.id}`][i])
+      cardList.push(
+        CardFactory.adaptiveCard( //cannot list cards that were predefined and rendered using dynamic placeholders AFAIK ~ doing this way gives it "content" and "content-type"
+          {
+            "type": "AdaptiveCard",
+            "body": [
+              {
+                "type": "TextBlock",
+                "size": "Medium",
+                "weight": "Bolder",
+                "text": `${suggestion.title}`
+              },
+              {
+                "type": "TextBlock",
+                "text": `${suggestion.desc}`,
+                "wrap": true
+              }
+            ],
+            "actions": [
+              {
+                "type": "Action.ShowCard",
+                "title": "Delete suggestion",
+                "card":{
+                    "body": [
+                    {
+                        "type": "TextBlock",
+                        "size": "Medium",
+                        "weight": "Bolder",
+                        "text": "Confirm?"
+                    }
+                    ],
+                "actions": [
+                    {
+                        "type": "Action.Execute",
+                        "title": "Confirm",
+                        "verb": "deleteSuggestion",
+                        "data": {"title": `${suggestion.title}`}
+                    }
+                ]
+                }
+              }
+            ],
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.4"
+          }
+        )
+      )
+    }
+    return cardList;
+  }
+  catch (err) {
+    console.error(err);
+    return;
   }
 }
 
