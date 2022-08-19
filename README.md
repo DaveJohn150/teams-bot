@@ -1,37 +1,37 @@
-#Microsoft Teams bot
+# Microsoft Teams bot
 
-##Resources used
-###Microsoft Teams toolkit
+## Resources used
+### Microsoft Teams toolkit
 A VScode extension that utilises the Microsoft bot framework to develop Microsoft Teams apps. The toolkit offers templates and a code skeleton for different kinds of apps.
 The Teams Toolkit for Visual Studio Code helps developers create and deploy Teams apps with integrated identity, access to cloud storage, data from Microsoft Graph, and other services in Azure and Microsoft 365 with a “zero-configuration” approach to the developer experience.
 Teams toolkit was selected to create this project as it includes the core tools needed to run and debug a Teams bot through visual studio code with minimal effort required to install.
 https://docs.microsoft.com/en-us/microsoftteams/platform/toolkit/visual-studio-code-overview
 
-###Microsoft 365 Developer Sandbox
+### Microsoft 365 Developer Sandbox
 Creates a fake administrator account with its own company and staff for testing Microsoft apps. Used for a sandbox Teams environment for testing the Teams bot.
 This was used for an environment to test the bot.
-Developer Program | Microsoft 365 Dev Center
+[Developer Program | Microsoft 365 Dev Center](https://developer.microsoft.com/en-us/microsoft-365/dev-program)
 
-###Adaptive card designer
+### Adaptive card designer
 A web based graphical designer for creating Microsoft’s adaptive cards and generating the JSON structure for them. 
-Designer | Adaptive Cards
+https://adaptivecards.io/designer/
 
-###Adaptive Cards studio
+### Adaptive Cards studio
 A VScode extension for designing and viewing adaptive cards. 
-Adaptive Card Studio - Visual Studio Marketplace
+https://marketplace.visualstudio.com/items?itemName=madewithcardsio.adaptivecardsstudiobeta
 
-###Additional resources
-Microsoft Teams app tutorials: Hello World with JavaScript - Teams | Microsoft Docs
-Teams app sample repository: Microsoft-Teams-Samples/samples at main · OfficeDev/Microsoft-Teams-Samples (github.com)
-Urban Dictionary API: Urban Dictionary API | Free API Key (for Developers) (rapidapi.com)
+### Additional resources
+Microsoft Teams app tutorials: [Hello World with JavaScript - Teams | Microsoft Docs](https://docs.microsoft.com/en-us/microsoftteams/platform/sbs-gs-bot?tabs=vscode%2Cviscode)
+Teams app sample repository: [Microsoft-Teams-Samples/samples at main · OfficeDev/Microsoft-Teams-Samples (github.com)](https://github.com/OfficeDev/Microsoft-Teams-Samples/tree/main/samples)
+Urban dictionary API - used to demonstrate the bot can access an external API: https://rapidapi.com/community/api/urban-dictionary
 
-##Main files:
-###/templates/appPackage/manifest.template.json 
+## Main files:
+### /templates/appPackage/manifest.template.json 
 Outlines the manifests of the dev and local manifests generated when ran/deployed. Defines the scope of the bot (personal, groupchat, team) and permissions of the bot
 “commandlists” defines the commands that will appear within the command palette in the search bar. Each command must have a title and description.
 “composeExtensions” defines the message extensions that the bot offers, where they can be invoked from and the task module associated with the extension.
 
-###/bot/internal/botActivityHandler.js
+### /bot/internal/botActivityHandler.js
 Defines the internal functionality of the bot. Overrides default handler functions from the TeamsActivityHandler class.
 The **onMessage** triggers whenever the bot is messaged or @mentioned within Teams. The switch-case statement handles any of the chat commands by reading the message. If no commands are detected through the cases, the default case will execute – in this bot it replies with the same message from the user but in a mOcKiNg cAsE.
 The **onMembersAdded** handler triggers when a user is added to the group chat or team. The context supplied to the handler includes the id of the member added, but not the name. The name is retrieved through TeamsInfo.getmember().
@@ -40,19 +40,19 @@ The **onAdaptiveCardInvoke** handler is called when an adaptive card has a butto
 The **handleTeamsMessagingExtensionSubmitAction** handler is called when the task module created from a message extension is submitted. The commandID from the message extension is used to determine which function is called.
 **handleTeamsMessagingExtensionSelectItem** enables the messaging extensions to show as a list and be selected.
 
-###/bot/adaptivecards
+### /bot/adaptivecards
 Contatains all the adaptive card templates for the bot to send to users 
 
-###/bot/internal/teamsBot.js
+### /bot/internal/teamsBot.js
 Creates a class extending the ConversationBot class containinig the botActivityHandler for activity functionality.
 
-###/bot/internal/initialize.js
+### /bot/internal/initialize.js
 Creates and initialises the bot from the classes
 
-###/bot/index.js
+### /bot/index.js
 Creates the REST API servers and listens for activity. When activity happens on the REST server, will invoke the bot to handle the activity. Any messages sent through teams are sent to /api/messages and for any notification activity from external applications, /api/notification has been designated.
 
-##Publishing the Teams bot
+## Publishing the Teams bot
 Once the bot has been provisioned and deployed to Azure through Teams toolkit, the app can either be published to the organisation or the Teams store. To publish to your organisation enter the Teams admin center: Manage apps - Microsoft Teams admin center and click on Team apps > Manage apps. 
  
 Clicking the upload a new app button within the Manage apps tab will open a modal to upload a zip file to. 
