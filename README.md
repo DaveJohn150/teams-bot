@@ -39,6 +39,7 @@ The **onMembersRemoved** handler triggers when a user is removed from the group 
 The **onAdaptiveCardInvoke** handler is called when an adaptive card has a button that triggers functionality within the bot. The learn card contains a like button which increments a counter on the card. This is done by calling the adaptive card invoke handler and reloading the card with the new counter value.
 The **handleTeamsMessagingExtensionSubmitAction** handler is called when the task module created from a message extension is submitted. The commandID from the message extension is used to determine which function is called.
 **handleTeamsMessagingExtensionSelectItem** enables the messaging extensions to show as a list and be selected.
+<img width="442" alt="image" src="https://user-images.githubusercontent.com/89892673/185564278-72528f90-e0c3-4c89-88d9-fb17fdef62e3.png"><img width="486" alt="Drawing1" src="https://user-images.githubusercontent.com/89892673/185566414-0c64a3ca-e1c8-4c59-9776-1bd7f68b3965.png">
 
 ### /bot/adaptivecards
 Contatains all the adaptive card templates for the bot to send to users 
@@ -54,7 +55,9 @@ Creates the REST API servers and listens for activity. When activity happens on 
 
 ## Publishing the Teams bot
 Once the bot has been provisioned and deployed to Azure through Teams toolkit, the app can either be published to the organisation or the Teams store. To publish to your organisation enter the Teams admin center: Manage apps - Microsoft Teams admin center and click on Team apps > Manage apps. 
- 
+
+ ![image](https://user-images.githubusercontent.com/89892673/185564463-f6e7371a-d560-4ad3-be40-2afe0d1698c0.png)
+  
 Clicking the upload a new app button within the Manage apps tab will open a modal to upload a zip file to. 
 The zip files to upload are created when provisioning the bot for deployment, the can be found in “<bot_name>/build/appPackage”. There will be two zip files, the local and the dev packages. The dev package contains the dev manifest, filled with the ids and endpoints from the bot in the Azure server, whereas the local appPackage contains the local ids of the bot.
 Upload the dev package to the admin center to be able to install the app within any Team in that organisation.
