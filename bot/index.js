@@ -22,10 +22,10 @@ server.post(
     try{console.log(req.body)}
     catch (err){console.log(err)}
     try{
-    if (!req.headers.auth){
+    if (!req.headers.authorization){
       throw 'Missing auth header';
     }
-    else if (req.headers.auth != process.env.BOTAUTH){ 
+    else if (req.headers.authorization != process.env.BOTAUTH){ 
       throw 'Invalid API key';
     }
     for (const target of await bot.notification.installations()) {
@@ -54,11 +54,11 @@ server.post(
   catch (err){
     console.log(err)
     if (err == 'Missing auth header'){
-      res.json(400, {errorMessage: 'Missing auth header'});
+      res.json(400, {errorMessage: 'Missing authorization header'});
       return;
     }
     else if (err == 'Invalid API key'){
-      res.json(401, {errorMessage: 'Invalid API auth key'});
+      res.json(401, {errorMessage: 'Invalid API authorization key'});
       return;
     }
     else{
