@@ -56,6 +56,14 @@
                         {
                             "title": "ud",
                             "description": "Looks up term written after ud."
+                        },
+                        {
+                            "title": "createsuggestion",
+                            "description": "Sends a card to add a suggestion to the team suggestion box"
+                        },
+                        {
+                            "title": "showsuggestions",
+                            "description": "Lists all suggestions in the team suggestion box"
                         }
                     ]
                 }
